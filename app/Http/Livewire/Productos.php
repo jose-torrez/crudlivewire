@@ -11,7 +11,7 @@ class Productos extends Component
     public $modal = false;
     public function render()
     {
-        $this->productos = Producto::all();
+        $this->productos = Producto::orderBy('id', 'asc')->get();
         return view('livewire.productos');
     }
     public function crear()
@@ -32,5 +32,31 @@ class Productos extends Component
     public function cerrarModal()
     {
         $this->modal = false;
+    }
+    public function editar($id)
+    {
+        $producto = Producto::findOrFail($id);
+        $this->id_producto = $producto->id;
+        $this->descripcion = $producto->descripcion;
+        $this->cantidad = $producto->cantidad;
+        $this->abrirModal();
+    }
+    public function eliminar($id)
+    {
+        Producto::find($id)->delete();
+        session()->flash('mensaje', 'Registro Eliminado!');
+    }
+    public function guardar()
+    {
+        Producto::updateOrCreate(['id' => $this->id_producto], [
+            'descripcion' => $this->descripcion,
+            'cantidad' => $this->cantidad
+        ]);
+        session()->flash(
+            'mensaje',
+            $this->id_producto ? 'Registro actulizado!' : 'Nuevo registro Guardado'
+        );
+        $this->cerrarModal();
+        $this->limpiarCampos();
     }
 }
